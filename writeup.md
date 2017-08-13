@@ -93,6 +93,8 @@ After that, we only select the white pixels within these windows, and fit a 2nd 
 
 We measure the curvature using differentiation. I'm assuming 30 metres per 720 pixels along the y axis, and 3.7 metres per 700 pixels along the x axis. For the curved image, `test1.jpg`, we get a curvature of about 1km for the left lane, and 2km for the right. The original curvature as per the project was about 1km. So these numbers look right.
 
+For the distance from the center, we know the center of the image. We now calculate the central x positions of both the lanes. We then subtract the two. The magnitude, multiplied by xm_per_pix, gives the deviation from center. If it's negative, then it's to the left, else to the right.
+
 ## 7. Drawing the lanes
 
 We first draw the lane on the warped image, and then apply an inverse perspective transform by just reversing the source and destination points. Lane detection applied to all of the test images look like:
