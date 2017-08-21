@@ -93,6 +93,8 @@ After that, we only select the white pixels within these windows, and fit a 2nd 
 
 We measure the curvature using differentiation. I'm assuming 30 metres per 720 pixels along the y axis, and 3.7 metres per 700 pixels along the x axis. For the curved image, `test1.png`, we get a curvature of about 1km for the left lane, and 2km for the right. The original curvature as per the project was about 1km. So these numbers look right.
 
+It is imperative to keep in mind that the lines also have to be fitted in meters, and then the curvature has to be measured in meters.
+
 For the distance from the center, we know the center of the image. We now calculate the central x positions of both the lanes. We then subtract the two. The magnitude, multiplied by xm_per_pix, gives the deviation from center. If it's negative, then it's to the left, else to the right.
 
 ## 7. Drawing the lanes
@@ -109,8 +111,17 @@ The `project_video_output.mp4` file shows the pipeline being applied to the proj
 
 ### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-The pipeline can likely fail in:
-1. Extreme curvature like in the challenge video
-2. Surrounding vehicles or interfering with the detection
+**1. Different color spaces**
+Currently, I use the HLS colorspace. However, different lighting conditions illuminate different lanes to different degrees. Saturation (in HLS) provides some tolerance to shadows and lights. However, passing by vehicles or shadows still "pull" the lane towards them. For example, I've heard that the R channel of RGB can be good for finding lines under some condition. Other color schemes to explore are LUV, LAB.
 
-The main problem I faced was with tuning the various thresholds, especially making it robust against different lighting conditions. I'm yet to figure out how to make the pipeline work under different weather conditions. Would that still require manual adjustment? Can it be automated?
+**2. Extreme curvature like in the challenge video**
+If the space is cramped (like the challenge video), we have less to detect lanes on. Traffic is generally close, and shadows can be unpredictably dark. The "interpolation" that I use when a lane is not detected in the current frame will not work for extremely curvature, because I cannot now average a lot of "past" frames. They might lead to "fixation" that no longer follows the curvature.
+
+**3. Brightness adjustment**
+The CLAHE algorithm for brightness adjustment can "preprocess" an image enough to normalize lighting conditions. It can normalize the "constrast" of the white and yellow lanes. This will help avoid sudden jumps when lighting conditions "suddently" change because of surrounding trees.
+
+**4. Usage of neural networks**
+I don't have a trainable set yet, but supervised learning with CNNs can prove useful. CNNs can help isolate features useful to lane detection, and can differentiate better between lanes and other noise.
+
+**5. Better parameter tuning for gradients and thresholds**
+I have not exhaustively tuned the gradient and threshold parameters. However, constructing a Jupyter notebook with "sliders" can help manually tune it faster. I'm also thinking about an automatic way to have "adaptive" gradient threhsolds, but it seems like a long way to go.
